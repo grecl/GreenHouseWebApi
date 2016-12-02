@@ -18,11 +18,10 @@ namespace GreenHouseWebApi.Controllers
             _deviceSetupRepository = deviceSetupRepository;
         }
 
-
         [HttpGet]
         public IActionResult GetAllDeviceSetups()
         {
-            ICollection<DeviceSetup> devices = _deviceSetupRepository.GetAll();
+            ICollection<DeviceConfiguration> devices = _deviceSetupRepository.GetAll();
 
             var mappedItems = devices.Select(AutoMapper.Mapper.Map<DeviceSetupDto>);
 
@@ -40,6 +39,27 @@ namespace GreenHouseWebApi.Controllers
             }
 
             return Ok(AutoMapper.Mapper.Map<DeviceSetupDto>(deviceSetup));
+        }
+
+        [HttpPut("{id:int}")]
+        public IActionResult UpdateDeviceSetup(int id, [FromBody] FoodItemDto dto)
+        {
+            DeviceSetup deviceSetupToCheck = _deviceSetupRepository.GetSingle(id);
+            if (deviceSetupToCheck == null)
+            {
+                return NotFound();
+            }
+            if (id != dto.Id)
+            {
+                return BadRequest("ids do not match");
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var updatedFoodItem = _deviceSetupRepository.Update(AutoMapper.Mapper.Map<DeviceSetup>(dto));
+            return Ok(AutoMapper.Mapper.Map<FoodItemDto>(updatedFoodItem));
         }
     }
 }

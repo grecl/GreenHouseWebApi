@@ -5,7 +5,7 @@ namespace GreenHouseWebApi.Model
 {
     public class DeviceConfiguration : DeviceSetup
     {
-        [Key]
+        //todo: define as unique
         public string SparkCoreId { get; set; }
 
         public string SparkCoreAccessToken { get; set; }

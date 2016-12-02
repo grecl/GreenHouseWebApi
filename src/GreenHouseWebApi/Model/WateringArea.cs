@@ -6,7 +6,7 @@ namespace GreenHouseWebApi.Model
     {
         public int Id { get; set; }
 
-        public DeviceSetup DeviceSetup { get; set; }
+        public DeviceConfiguration DeviceConfiguration { get; set; }
         public WateringLocation WateringLocation { get; set; }
 
         public string AreaName { get; set; }

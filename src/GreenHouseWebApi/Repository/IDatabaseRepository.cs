@@ -9,6 +9,6 @@ namespace GreenHouseWebApi.Repository
         void Delete(int id);
         ICollection<T> GetAll();
         int Count();
-        T Update(int id, T item);
+        T Update(T item);
     }
 }
