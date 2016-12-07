@@ -101,7 +101,7 @@ namespace GreenHouseWebApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            var updatedItem = _deviceSetupRepository.UpdateWateringArea(AutoMapper.Mapper.Map<WateringArea>(dto));
+            var updatedItem = _deviceSetupRepository.UpdateWateringArea(device.Id, AutoMapper.Mapper.Map<WateringArea>(dto));
             return Ok(AutoMapper.Mapper.Map<WateringAreaDto>(updatedItem));
         }
     }

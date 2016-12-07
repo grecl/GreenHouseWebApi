@@ -74,5 +74,31 @@ namespace GreenHouseWebApi.Repository
 
             return existingConfiguration;
         }
+
+        public WateringArea UpdateWateringArea(int deviceId, WateringArea wateringArea)
+        {
+
+            DeviceConfiguration existingConfiguration = GetSingle(deviceId);
+            if (existingConfiguration != null)
+            {
+                var wateringAreaToUpdate =
+                    existingConfiguration.WateringAreas.SingleOrDefault(w => w.Id == wateringArea.Id);
+                if (wateringAreaToUpdate != null)
+                {
+
+
+                    _dbContext.Update(wateringAreaToUpdate);
+
+                    wateringAreaToUpdate.AreaName = wateringArea.AreaName;
+                    wateringAreaToUpdate.MaxSoilHumidity = wateringArea.MaxSoilHumidity;
+                    wateringAreaToUpdate.MinSoilHumidity = wateringArea.MinSoilHumidity;
+
+                    _dbContext.SaveChanges();
+
+                    return wateringAreaToUpdate;
+                }
+            }
+            return null;
+        }
     }
 }

@@ -7,6 +7,6 @@ namespace GreenHouseWebApi.Repository
     public interface IDeviceSetupRepository : IDatabaseRepository<DeviceConfiguration>
     {
         DeviceSetup Update(DeviceSetup deviceSetup);
-        WateringArea UpdateWateringArea(WateringArea map);
+        WateringArea UpdateWateringArea(int deviceId, WateringArea wateringArea);
     }
 }
