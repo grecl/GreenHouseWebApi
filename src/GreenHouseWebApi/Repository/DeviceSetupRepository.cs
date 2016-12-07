@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GreenHouseWebApi.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace GreenHouseWebApi.Repository
 {
@@ -15,7 +16,7 @@ namespace GreenHouseWebApi.Repository
 
         public DeviceConfiguration GetSingle(int id)
         {
-            var deviceConfig = _dbContext.DeviceConfigurations.Single(dev => dev.Id == id);
+            var deviceConfig = _dbContext.DeviceConfigurations.Include(dc=>dc.WateringAreas).SingleOrDefault(dev => dev.Id == id);
 
             return deviceConfig;
         }
@@ -40,7 +41,7 @@ namespace GreenHouseWebApi.Repository
 
         public ICollection<DeviceConfiguration> GetAll()
         {
-            List<DeviceConfiguration> deviceSetups = _dbContext.DeviceConfigurations.ToList();
+            List<DeviceConfiguration> deviceSetups = _dbContext.DeviceConfigurations.Include(dc => dc.WateringAreas).ToList();
             return deviceSetups;
         }
 

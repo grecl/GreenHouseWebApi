@@ -69,6 +69,7 @@ namespace GreenHouseWebApi
             {
                 mapper.CreateMap<FoodItem, FoodItemDto>().ReverseMap();
                 mapper.CreateMap<DeviceSetup, DeviceSetupDto>().ReverseMap();
+                mapper.CreateMap<WateringArea, WateringAreaDto>().ReverseMap();
             });
 
             app.UseMvc();
