@@ -67,26 +67,42 @@ namespace GreenHouseWebApi.Controllers
             return Ok(AutoMapper.Mapper.Map<WateringAreaDto>(wateringArea));
         }
 
-      /*  [HttpPut("{id:int}")]
-        public IActionResult UpdateDeviceSetup(int id, [FromBody] FoodItemDto dto)
+        [HttpPut("{id:int}")]
+        public IActionResult UpdateDeviceSetup(int deviceId, int id, [FromBody] WateringAreaDto dto)
         {
-            DeviceSetup deviceSetupToCheck = _deviceSetupRepository.GetSingle(id);
-            if (deviceSetupToCheck == null)
-            {
-                return NotFound();
-            }
             if (id != dto.Id)
             {
                 return BadRequest("ids do not match");
             }
+
+            DeviceConfiguration device = _deviceSetupRepository.GetSingle(deviceId);
+
+            if (device == null)
+            {
+                return NotFound();
+            }
+
+            ICollection<WateringArea> wateringAreas = device.WateringAreas;
+
+            if (wateringAreas == null || !wateringAreas.Any())
+            {
+                return NotFound();
+            }
+
+            var wateringArea = wateringAreas.Single(w => w.Id == id);
+
+            if (wateringArea == null)
+            {
+                return NotFound();
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var updatedFoodItem = _deviceSetupRepository.Update(AutoMapper.Mapper.Map<DeviceSetup>(dto));
-            return Ok(AutoMapper.Mapper.Map<FoodItemDto>(updatedFoodItem));
+            var updatedItem = _deviceSetupRepository.UpdateWateringArea(AutoMapper.Mapper.Map<WateringArea>(dto));
+            return Ok(AutoMapper.Mapper.Map<WateringAreaDto>(updatedItem));
         }
-        */
     }
 }
