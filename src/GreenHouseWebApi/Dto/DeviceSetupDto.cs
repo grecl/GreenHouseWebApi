@@ -15,6 +15,5 @@ namespace GreenHouseWebApi.Dto
         public int PostBackIntervalMinutes { get; set; }
 
         public ICollection<int> WateringAreaIds { get; set; }
-
     }
 }
