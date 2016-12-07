@@ -58,8 +58,8 @@ namespace GreenHouseWebApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            var updatedFoodItem = _deviceSetupRepository.Update(AutoMapper.Mapper.Map<DeviceSetup>(dto));
-            return Ok(AutoMapper.Mapper.Map<FoodItemDto>(updatedFoodItem));
+            var updatedItem = _deviceSetupRepository.Update(AutoMapper.Mapper.Map<DeviceSetup>(dto));
+            return Ok(AutoMapper.Mapper.Map<DeviceSetupDto>(updatedItem));
         }
     }
 }
