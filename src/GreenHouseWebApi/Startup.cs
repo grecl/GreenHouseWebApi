@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GreenHouseWebApi.Dto;
 using GreenHouseWebApi.Model;
 using GreenHouseWebApi.Repository;
+using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -73,6 +74,8 @@ namespace GreenHouseWebApi
             });
 
             app.UseMvc();
+            app.UseHangfireDashboard();
+            app.UseHangfireServer();
 
             DbInitializer.Initialize(databaseContext);
         }
