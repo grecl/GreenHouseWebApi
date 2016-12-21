@@ -6,6 +6,6 @@ namespace GreenHouseWebApi.BusinessService.Operations
 {
     public interface IDevicePollingService
     {
-        void PollDevice();
+        void PollDevice(int deviceId);
     }
 }

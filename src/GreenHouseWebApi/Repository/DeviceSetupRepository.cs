@@ -37,6 +37,7 @@ namespace GreenHouseWebApi.Repository
             {
                 _dbContext.DeviceConfigurations.Remove(deviceConfig);
             }
+            _dbContext.SaveChanges();
         }
 
         public ICollection<DeviceConfiguration> GetAll()

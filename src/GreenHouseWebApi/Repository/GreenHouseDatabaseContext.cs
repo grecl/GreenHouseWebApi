@@ -1,3 +1,4 @@
+using GreenHouse.DataModel.Log;
 using GreenHouseWebApi.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -10,8 +11,8 @@ namespace GreenHouseWebApi.Repository
         {
         }
 
-        // public DbSet<HumidityLogEntry> AirHumidityLogEntries { get; set; }
-        // public DbSet<SoilHumidityLogEntry> SoilHumidityLogEntries { get; set; }
+        public DbSet<AirHumidityLogEntry> AirHumidityLogEntries { get; set; }
+        public DbSet<SoilHumidityLogEntry> SoilHumidityLogEntries { get; set; }
 
         public DbSet<DeviceConfiguration> DeviceConfigurations { get; set; }
 

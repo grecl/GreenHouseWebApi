@@ -20,8 +20,7 @@ namespace GreenHouseWebApi.Controllers
         [HttpPost]
         public IActionResult ExecuteDevicePolling(int deviceId)
         {
-            //Todo: poll the device with the id
-            _devicePollingService.PollDevice();
+            _devicePollingService.PollDevice(deviceId);
 
             return Ok();
         }

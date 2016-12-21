@@ -50,7 +50,7 @@ namespace GreenHouseWebApi
             services.AddSingleton<IFoodRepository, FoodRepository>();
             
             services.AddDbContext<GreenHouseDatabaseContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            
+            services.AddHangfire(configuration => configuration.UseSqlServerStorage(Configuration.GetConnectionString("HangFireConnection")));
             services.AddMvc();
         }
 
@@ -74,6 +74,7 @@ namespace GreenHouseWebApi
             });
 
             app.UseMvc();
+
             app.UseHangfireDashboard();
             app.UseHangfireServer();
 
