@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using GreenHouseWebApi.Model;
+using ParticleSDK;
+using ParticleSDK.Models;
+
 
 namespace GreenHouse.BusinessService.Device
 {
     public class GreenHouseSparkDeviceService : IGreenHouseSparkDeviceService
-    {
-        /*
+    { 
         private const string SPARKFUNCTION_ACTION_STARTWATERING = "water";
         private const string SPARKFUNCTION_ACTION_SAVECONFIG = "saveConfig";
 
@@ -18,101 +22,85 @@ namespace GreenHouse.BusinessService.Device
         private const string SPARKVARIABLE_LIGHTLEVEL = "lightLevel";
         private const string SPARKVARIABLE_ZONEONE_SOILHUMIDITY = "soilHumZone1";
         private const string SPARKVARIABLE_ZONETWO_SOILHUMIDITY = "soilHumZone2";
-
-        private readonly SparkClient _sparkClient;
-        private string _accessToken;
-        private string _coreId;
         
-
         public GreenHouseSparkDeviceService()
         {
-            _accessToken = System.Web.Configuration.WebConfigurationManager.AppSettings["SparkApi:AccessToken"];
-            _coreId = System.Web.Configuration.WebConfigurationManager.AppSettings["SparkApi:CoreId"];
-            _sparkClient = new SparkClient(_accessToken, _coreId);
+            
         }
 
-        public SparkDeviceOperationState RequestCurrentState(string sparkCoreId)
+        public async Task<SparkDeviceOperationState> RequestCurrentState(DeviceConfiguration deviceConfig)
         {
-            SparkVariableResult result = _sparkClient.GetVariable(SPARKVARIABLE_CURRENTSTATE);
+            ParticleDevice device = await LoginAndGetParticleDevice(deviceConfig);
 
-            if (result.HasError)
-            {
-                throw new SparkDeviceException("Error occurred while requesting current state", result);
-            }
+            ParticleVariableResponse currentStateResult = await device.GetVariableAsync(SPARKVARIABLE_CURRENTSTATE);
 
             try
             {
-                SparkDeviceOperationState operationState = (SparkDeviceOperationState) result.GetIntValue();
+                SparkDeviceOperationState operationState = (SparkDeviceOperationState)int.Parse(currentStateResult.Result);
                 return operationState;
             }
             catch (Exception e)
             {
                 throw new InvalidOperationException("Enum value not supported for SparkDeviceOperationState");    
-            }
-            
+            }  
         }
 
-        public double RequestCurrentTemperature(string sparkCoreId)
+        private static async Task<ParticleDevice> LoginAndGetParticleDevice(DeviceConfiguration deviceConfig)
         {
-            SparkVariableResult result = _sparkClient.GetVariable(SPARKVARIABLE_AIRTEMPERATURE);
-
-            if (result.HasError)
-            {
-                throw new SparkDeviceException("Error occurred while requesting current air temperature", result);
-            }
-
-            return result.GetDoubleValue();
+            string accessToken = deviceConfig.SparkCoreAccessToken;
+            string deviceId = deviceConfig.SparkCoreId;
+            await ParticleCloud.SharedCloud.TokenLoginAsync(accessToken);
+            var device = await ParticleCloud.SharedCloud.GetDeviceAsync(deviceId);
+            return device;
         }
 
-        public double RequestCurrentAirHumidityPercentage(string sparkCoreId)
+        public async Task<double> RequestCurrentTemperature(DeviceConfiguration deviceConfig)
         {
-            SparkVariableResult result = _sparkClient.GetVariable(SPARKVARIABLE_AIRHUMIDITY);
+            ParticleDevice device = await LoginAndGetParticleDevice(deviceConfig);
 
-            if (result.HasError)
-            {
-                throw new SparkDeviceException("Error occurred while requesting current air humidity", result); 
-            }
+            ParticleVariableResponse response = await device.GetVariableAsync(SPARKVARIABLE_AIRTEMPERATURE);
 
-            return result.GetDoubleValue();
+            return double.Parse(response.Result);
         }
 
-        public double RequestCurrentAirDewpoint(string sparkCoreId)
+        public async Task<double> RequestCurrentAirHumidityPercentage(DeviceConfiguration deviceConfig)
         {
-            SparkVariableResult result = _sparkClient.GetVariable(SPARKVARIABLE_AIRDEWPOINT);
+            ParticleDevice device = await LoginAndGetParticleDevice(deviceConfig);
 
-            if (result.HasError)
-            {
-                throw new SparkDeviceException("Error occurred while requesting current air dewpoint", result);
-            }
+            ParticleVariableResponse response = await device.GetVariableAsync(SPARKVARIABLE_AIRHUMIDITY);
 
-            return result.GetDoubleValue();
+            return double.Parse(response.Result);
         }
 
-        public double RequestCurrentLightLevelPercentage()
+        public async Task<double> RequestCurrentAirDewpoint(DeviceConfiguration deviceConfig)
         {
-            SparkVariableResult result = _sparkClient.GetVariable(SPARKVARIABLE_LIGHTLEVEL);
+            ParticleDevice device = await LoginAndGetParticleDevice(deviceConfig);
 
-            if (result.HasError)
-            {
-                throw new SparkDeviceException("Error occurred while requesting current light level", result);
-            }
+            ParticleVariableResponse response = await device.GetVariableAsync(SPARKVARIABLE_AIRDEWPOINT);
 
-            return result.GetDoubleValue();
+            return double.Parse(response.Result);
         }
 
-        public double RequestCurrentSoilMoisturePercentage(string sparkCoreId, WateringLocation wateringLocation)
+        public async Task<double> RequestCurrentLightLevelPercentage(DeviceConfiguration deviceConfig)
+        {
+            ParticleDevice device = await LoginAndGetParticleDevice(deviceConfig);
+
+            ParticleVariableResponse response = await device.GetVariableAsync(SPARKVARIABLE_LIGHTLEVEL);
+
+            return double.Parse(response.Result);
+        }
+
+        public async Task<double> RequestCurrentSoilMoisturePercentage(DeviceConfiguration deviceConfig, WateringLocation wateringLocation)
         {
             string variableName = wateringLocation == WateringLocation.First
                 ? SPARKVARIABLE_ZONEONE_SOILHUMIDITY
                 : SPARKVARIABLE_ZONETWO_SOILHUMIDITY;
-            SparkVariableResult result = _sparkClient.GetVariable(variableName);
 
-            if (result.HasError)
-            {
-                throw new SparkDeviceException("Error occurred while requesting current soil humidity", result);
-            }
+            ParticleDevice device = await LoginAndGetParticleDevice(deviceConfig);
 
-            return result.GetDoubleValue();
+            ParticleVariableResponse response = await device.GetVariableAsync(variableName);
+
+            return double.Parse(response.Result);
         } 
 
 
@@ -121,31 +109,38 @@ namespace GreenHouse.BusinessService.Device
         /// </summary>
         /// <param name="wateringLocation"></param>
         /// <returns>Convention: -1 Failure</returns>
-        public void StartWatering(WateringLocation wateringLocation)
+        public async void StartWatering(DeviceConfiguration deviceConfig, WateringLocation wateringLocation)
         {
-           int result = _sparkClient.ExecuteFunctionReturnValue(SPARKFUNCTION_ACTION_STARTWATERING, Enum.GetName(typeof(WateringLocation), wateringLocation));
-            if (result < 0)
+            ParticleDevice device = await LoginAndGetParticleDevice(deviceConfig);
+
+            ParticleFunctionResponse functionResponse = await device.RunFunctionAsync(SPARKFUNCTION_ACTION_STARTWATERING, Enum.GetName(typeof (WateringLocation), wateringLocation));
+
+            
+            if (functionResponse.ReturnValue < 0)
             {
-                throw new SparkDeviceException("Error occurred while starting the watering process");
+                throw new Exception("Error occurred while starting the watering process");
             }
         }
 
-        public void SaveDeviceConfiguration(DeviceConfiguration deviceConfig)
+        public async void SaveDeviceConfiguration(DeviceConfiguration deviceConfig)
         {
+
             if (deviceConfig != null)
             {
                 string setupString = CreateDeviceConfigurationString(deviceConfig);
+
+                ParticleDevice device = await LoginAndGetParticleDevice(deviceConfig);
 
                 //send each config param separately to minimize problems with the size restriction (63 char)
                 foreach (string configParameter in setupString.Split(';'))
                 {
                     if (!string.IsNullOrWhiteSpace(configParameter))
                     {
-                        var result = _sparkClient.ExecuteFunctionReturnValue(SPARKFUNCTION_ACTION_SAVECONFIG,
-                            configParameter);
-                        if (result < 0)
+                        ParticleFunctionResponse functionResponse = await device.RunFunctionAsync(SPARKFUNCTION_ACTION_SAVECONFIG, configParameter);
+                        
+                        if (functionResponse.ReturnValue < 0)
                         {
-                            throw new SparkDeviceException("Error occurred while saving the confguration params");
+                            throw new Exception("Error occurred while saving the confguration params");
                         }
                     }
                 }
@@ -185,45 +180,7 @@ namespace GreenHouse.BusinessService.Device
             return configStringBuilder.ToString();
 
         }
-        */
-        public SparkDeviceOperationState RequestCurrentState(string sparkCoreId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public double RequestCurrentTemperature(string sparkCoreId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public double RequestCurrentAirHumidityPercentage(string sparkCoreId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public double RequestCurrentAirDewpoint(string sparkCoreId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public double RequestCurrentLightLevelPercentage()
-        {
-            throw new NotImplementedException();
-        }
-
-        public double RequestCurrentSoilMoisturePercentage(string sparkCoreId, WateringLocation wateringLocation)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void StartWatering(WateringLocation wateringLocation)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SaveDeviceConfiguration(DeviceSetup deviceSetup)
-        {
-            throw new NotImplementedException();
-        }
+      
     }
+
 }

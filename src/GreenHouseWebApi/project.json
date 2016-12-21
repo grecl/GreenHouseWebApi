@@ -18,7 +18,7 @@
     "Microsoft.Extensions.Configuration.Json": "1.0.0",
     "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0",
     "Hangfire": "1.6.7",
-    "ParticleNET.ParticleSDK": "0.8.16"
+    "ParticleSDK": "1.0.0-*"
   },
 
   "tools": {
